@@ -68,6 +68,8 @@ def fetch_price(product: dict) -> int | None:
                 price = r.get("price")
                 return int(price) if price else None
         # Not matched in search results -> fall through to details endpoint.
+        print(f"  [warn] id {pid} not found in search results for "
+              f"{product['query']!r}", file=sys.stderr)
     except Exception as e:
         print(f"  [warn] search failed ({e}); trying details endpoint", file=sys.stderr)
 
