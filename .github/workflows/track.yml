@@ -2,7 +2,7 @@ name: Track prices
 
 on:
   schedule:
-    - cron: "17 1,7,13,19 * * *"  # every 6 hours (UTC)
+    - cron: "7,37 * * * *"  # every 30 minutes (UTC)
   workflow_dispatch:
 
 permissions:

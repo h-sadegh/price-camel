@@ -35,6 +35,7 @@ HEADERS = {
 }
 
 DIGIKALA_URL = "https://api.digikala.com/v2/product/{id}/"
+SELLERS_URL = "https://api.torob.com/v4/base-product/sellers/?prk={id}"
 RETRIES = 3
 RETRY_DELAY = 5  # seconds
 
@@ -56,6 +57,25 @@ def http_get_json(url: str, timeout: int = 20) -> dict:
             last_err = str(e)
         time.sleep(RETRY_DELAY)
     raise RuntimeError(f"GET failed after {RETRIES} tries: {url} ({last_err})")
+
+
+def fetch_sellers_stats(pid: str, n: int = 10) -> tuple[int, float, int] | None:
+    """Return (min_price, avg_of_first_n, seller_count) from the Torob sellers endpoint.
+
+    Torob returns sellers roughly price-sorted; we sort by price ourselves
+    anyway and average the cheapest n available offers.
+    """
+    try:
+        data = http_get_json(SELLERS_URL.format(id=pid))
+        prices = [int(r["price"]) for r in data.get("results", [])
+                  if r.get("price") and r.get("availability", True)]
+        if not prices:
+            return None
+        prices.sort()
+        cheapest_n = prices[:n]
+        return prices[0], round(sum(cheapest_n) / len(cheapest_n)), len(prices)
+    except Exception:
+        return None
 
 
 def fetch_price(product: dict) -> int | None:
@@ -85,7 +105,7 @@ def fetch_price(product: dict) -> int | None:
 
 
 def fetch_price_digikala(product: dict) -> int | None:
-    """Fetch the current price (toman) of a Digikala product via /v2/product/.
+    """Return the current price (toman) of a Digikala product via /v2/product/.
 
     Digikala prices are in RIALS; convert to toman (divide by 10) so all
     history stays in one unit. Unavailable products (no default_variant
@@ -104,20 +124,29 @@ def fetch_price_digikala(product: dict) -> int | None:
         return None
 
 
-def append_sample(pid: str, price: int) -> None:
+def append_sample(pid: str, price: int, avg: int | None = None) -> None:
     DATA_DIR.mkdir(exist_ok=True)
     path = DATA_DIR / f"{pid}.json"
     samples = []
     if path.exists():
         try:
             samples = json.loads(path.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError):
+        except (ValueError, OSError):
             samples = []  # corrupt file -> start over rather than crash
-    # Skip duplicate sample if price unchanged within the last 12 hours.
+    # Skip duplicate sample if price AND avg unchanged within the last 12 hours.
     now = int(time.time())
-    if samples and samples[-1]["price"] == price and now - samples[-1]["ts"] < 12 * 3600:
-        return
-    samples.append({"ts": now, "price": price})
+    last = samples[-1] if samples else None
+    if last and now - last["ts"] < 12 * 3600:
+        same_price = last["price"] == price
+        last_avg = last.get("avg")
+        same_avg = (last_avg == avg) or (avg is not None and last_avg is not None
+                                         and abs(last_avg - avg) / last_avg < 0.005)
+        if same_price and (same_avg or avg is None):
+            return
+    entry = {"ts": now, "price": price}
+    if avg is not None:
+        entry["avg"] = avg
+    samples.append(entry)
     path.write_text(json.dumps(samples, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
@@ -133,19 +162,26 @@ def main() -> int:
         pid = product["id"]
         print(f"[track] {product.get('name', pid)} ({pid})")
         try:
+            avg = None
             if product.get("source") == "digikala":
                 price = fetch_price_digikala(product)
             else:
                 price = fetch_price(product)
+                stats = fetch_sellers_stats(pid)
+                if stats:
+                    min_p, avg, sellers = stats
+                    price = min_p  # cheapest offer across sellers
         except Exception as e:
             print(f"  [error] {e}", file=sys.stderr)
             price = None
+            avg = None
         if price is None:
             print("  -> no price (skipped)")
             fail += 1
         else:
-            append_sample(pid, price)
-            print(f"  -> {price:,} toman")
+            append_sample(pid, price, avg)
+            extra = f" | avg10={avg:,}" if avg else ""
+            print(f"  -> {price:,} toman{extra}")
             ok += 1
         time.sleep(3)  # be polite to the API
 

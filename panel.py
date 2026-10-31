@@ -84,6 +84,9 @@ def build():
             last = samples[-1]
             last_dt = datetime.datetime.fromtimestamp(last["ts"], TZ).strftime("%m/%d %H:%M")
             price = fmt_price(last["price"])
+            avg = last.get("avg")
+            avg_html = (f'<div class="avg">میانگین ۱۰ فروشنده ارزان: {fmt_price(avg)} تومان</div>'
+                        if avg else "")
             first = samples[0]["price"]
             change = (last["price"] - first) / first * 100 if first else 0
             sign = "▲" if change > 0 else ("▼" if change < 0 else "—")
@@ -99,6 +102,7 @@ def build():
             last_dt = "—"
             change_html = ""
             target_html = ""
+            avg_html = ""
         src = p.get("source", "torob")
         src_badge = {"torob": "ترب", "digikala": "دیجیکالا"}.get(src, src)
         url = p.get("url", "#")
@@ -112,6 +116,7 @@ def build():
             <div class="price">{price} <small>تومان</small></div>
             <div class="meta">آخرین برداشت: {last_dt} • {len(samples)} نمونه</div>
           </div>
+          {avg_html}
           {change_html}
           {target_html}
           {sparkline_svg(samples)}
@@ -144,6 +149,7 @@ def build():
   .up {{ color: #e05252; font-size: 0.8rem; }}
   .down {{ color: #3aa66a; font-size: 0.8rem; }}
   .flat {{ color: #8b93a7; font-size: 0.8rem; }}
+  .avg {{ margin-top: 4px; font-size: 0.8rem; color: #7ab8ff; }}
   .target {{ margin-top: 4px; font-size: 0.8rem; color: #d8b04a; }}
   .chart {{ width: 100%; height: 120px; margin-top: 10px; display: block; }}
   .empty {{ color: #8b93a7; font-size: 0.8rem; padding: 24px 0; text-align: center; }}
