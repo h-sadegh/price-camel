@@ -132,7 +132,8 @@ def build():
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>قیمت‌شتر 🐫 — پنل قیمت‌ها</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐫</text></svg>">
+<title>چک قیمت — پایش قیمت محصولات</title>
 <style>
   :root {{ color-scheme: dark; }}
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
@@ -164,13 +165,13 @@ def build():
 </head>
 <body>
 <header>
-  <h1>🐫 قیمت‌شتر</h1>
+  <h1>🐫 چک قیمت</h1>
   <div class="updated">آخرین به‌روزرسانی: {now}</div>
 </header>
 <div class="grid">
 {''.join(cards)}
 </div>
-<footer>ساخته‌شده خودکار از داده‌های ریپازیتوری — هر ۶ ساعت به‌روز می‌شود</footer>
+<footer>ساخته‌شده خودکار از داده‌های ریپازیتوری — هر ۳۰ دقیقه به‌روز می‌شود</footer>
 </body>
 </html>''', encoding="utf-8")
     print(f"dashboard written: {OUT} ({len(products)} products)")
