@@ -19,7 +19,8 @@
       "name": "مولفیکس ترکیه سایز ۵ — بسته ۷۸ عددی (چسبی)",
       "query": "پوشک کودک مولفیکس مدل Ultra Firsat paketi سایز 5 بسته 78 عددی",
       "target_price": null,
-      "url": "https://torob.com/p/5cdecca2-b128-47b5-92d8-b936bf850c10/"
+      "url": "https://torob.com/p/5cdecca2-b128-47b5-92d8-b936bf850c10/",
+      "digikala_id": "17232262"
     },
     {
       "id": "ac3a98a2-5ad2-428d-9d71-d2d58aa361fc",
@@ -33,21 +34,8 @@
       "name": "مولفیکس ترکیه سایز ۶ — بسته ۶۲ عددی (چسبی)",
       "query": "پوشک بچه مولفیکس سایز 6 بسته 62 عددی",
       "target_price": null,
-      "url": "https://torob.com/p/f51e2820-175e-42e9-992a-8eb42e185c58/"
-    },
-    {
-      "id": "17232262",
-      "name": "دیجیکالا — مولفیکس ترکیه سایز ۵ بسته ۷۸ عددی",
-      "target_price": null,
-      "source": "digikala",
-      "url": "https://api.telegram.org/product-17232262/"
-    },
-    {
-      "id": "17232334",
-      "name": "دیجیکالا — مولفیکس ترکیه سایز ۶ بسته ۶۲ عددی",
-      "target_price": null,
-      "source": "digikala",
-      "url": "https://api.telegram.org/product-17232334/"
+      "url": "https://torob.com/p/f51e2820-175e-42e9-992a-8eb42e185c58/",
+      "digikala_id": "17232334"
     }
   ]
 }

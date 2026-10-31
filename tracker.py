@@ -104,6 +104,20 @@ def fetch_price(product: dict) -> int | None:
         return None
 
 
+def fetch_price_digikala_by_id(dk_id: str) -> int | None:
+    """Return the current price (toman) of a Digikala product id (rials -> toman)."""
+    try:
+        data = http_get_json(DIGIKALA_URL.format(id=dk_id))
+        prod = (data.get("data") or {}).get("product") or {}
+        variant = prod.get("default_variant") or {}
+        price = (variant.get("price") or {}).get("selling_price")
+        if price is None:
+            price = variant.get("selling_price")
+        return int(price) // 10 if price else None
+    except Exception:
+        return None
+
+
 def fetch_price_digikala(product: dict) -> int | None:
     """Return the current price (toman) of a Digikala product via /v2/product/.
 
@@ -124,7 +138,8 @@ def fetch_price_digikala(product: dict) -> int | None:
         return None
 
 
-def append_sample(pid: str, price: int, avg: int | None = None) -> None:
+def append_sample(pid: str, price: int, avg: int | None = None,
+                  dk_price: int | None = None) -> None:
     DATA_DIR.mkdir(exist_ok=True)
     path = DATA_DIR / f"{pid}.json"
     samples = []
@@ -146,6 +161,8 @@ def append_sample(pid: str, price: int, avg: int | None = None) -> None:
     entry = {"ts": now, "price": price}
     if avg is not None:
         entry["avg"] = avg
+    if dk_price is not None:
+        entry["dk"] = dk_price
     samples.append(entry)
     path.write_text(json.dumps(samples, ensure_ascii=False, indent=1), encoding="utf-8")
 
@@ -163,6 +180,7 @@ def main() -> int:
         print(f"[track] {product.get('name', pid)} ({pid})")
         try:
             avg = None
+            dk_price = None
             if product.get("source") == "digikala":
                 price = fetch_price_digikala(product)
             else:
@@ -171,16 +189,24 @@ def main() -> int:
                 if stats:
                     min_p, avg, sellers = stats
                     price = min_p  # cheapest offer across sellers
+                dk_id = product.get("digikala_id")
+                if dk_id:
+                    dk_price = fetch_price_digikala_by_id(dk_id)
         except Exception as e:
             print(f"  [error] {e}", file=sys.stderr)
             price = None
             avg = None
+            dk_price = None
         if price is None:
             print("  -> no price (skipped)")
             fail += 1
         else:
-            append_sample(pid, price, avg)
-            extra = f" | avg10={avg:,}" if avg else ""
+            append_sample(pid, price, avg, dk_price)
+            extra = ""
+            if avg:
+                extra += f" | avg10={avg:,}"
+            if dk_price:
+                extra += f" | dk={dk_price:,}"
             print(f"  -> {price:,} toman{extra}")
             ok += 1
         time.sleep(3)  # be polite to the API
