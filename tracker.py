@@ -34,6 +34,7 @@ HEADERS = {
     "Accept": "application/json",
 }
 
+DIGIKALA_URL = "https://api.digikala.com/v2/product/{id}/"
 RETRIES = 3
 RETRY_DELAY = 5  # seconds
 
@@ -83,6 +84,26 @@ def fetch_price(product: dict) -> int | None:
         return None
 
 
+def fetch_price_digikala(product: dict) -> int | None:
+    """Fetch the current price (toman) of a Digikala product via /v2/product/.
+
+    Digikala prices are in RIALS; convert to toman (divide by 10) so all
+    history stays in one unit. Unavailable products (no default_variant
+    price) return None.
+    """
+    try:
+        data = http_get_json(DIGIKALA_URL.format(id=product["id"]))
+        prod = (data.get("data") or {}).get("product") or {}
+        variant = prod.get("default_variant") or {}
+        price = (variant.get("price") or {}).get("selling_price")
+        if price is None:
+            # try the variant's own fields (some payloads nest differently)
+            price = variant.get("selling_price")
+        return int(price) // 10 if price else None
+    except Exception:
+        return None
+
+
 def append_sample(pid: str, price: int) -> None:
     DATA_DIR.mkdir(exist_ok=True)
     path = DATA_DIR / f"{pid}.json"
@@ -112,7 +133,10 @@ def main() -> int:
         pid = product["id"]
         print(f"[track] {product.get('name', pid)} ({pid})")
         try:
-            price = fetch_price(product)
+            if product.get("source") == "digikala":
+                price = fetch_price_digikala(product)
+            else:
+                price = fetch_price(product)
         except Exception as e:
             print(f"  [error] {e}", file=sys.stderr)
             price = None

@@ -41,6 +41,20 @@
       "query": "پوشک بچه مولفیکس ترکیه شماره 6 تعداد 62 تایی",
       "target_price": null,
       "url": "https://torob.com/p/4e848fdb-19fc-4c3e-b1a8-f3cf35f6cabf/"
+    },
+    {
+      "id": "17232262",
+      "name": "دیجیکالا — مولفیکس ترکیه سایز ۵ (۷۸ عددی Ultra Firsat)",
+      "target_price": null,
+      "source": "digikala",
+      "url": "https://<HOSTNAME_5>/product-17232262/"
+    },
+    {
+      "id": "17232334",
+      "name": "دیجیکالا — مولفیکس ترکیه سایز ۶ (۶۲ عددی Ultra Firsat)",
+      "target_price": null,
+      "source": "digikala",
+      "url": "https://<HOSTNAME_5>/product-17232334/"
     }
   ]
 }
