@@ -14,6 +14,7 @@ How it works:
 """
 
 import json
+import re
 import sys
 import time
 import urllib.error
@@ -138,8 +139,41 @@ def fetch_price_digikala(product: dict) -> int | None:
         return None
 
 
+
+
+def fetch_price_custom(url: str) -> int | None:
+    """Fetch a custom-shop product page; extract price from JSON "price" field
+    or JSON-LD AggregateOffer lowPrice. Rial values (>10M) convert to toman."""
+    try:
+        req = urllib.request.Request(url, headers=HEADERS)
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            html = resp.read().decode("utf-8", "replace")
+        price = None
+        m = re.search(r'"price"\s*:\s*"?([0-9]+)"?', html)
+        if m:
+            price = int(m.group(1))
+        if price is None:
+            ld = re.search(
+                r'application/ld\+json[^>]*>(.*?)</script>', html, re.S)
+            if ld:
+                try:
+                    d = json.loads(ld.group(1))
+                    off = d.get("offers") or {}
+                    lp = off.get("lowPrice")
+                    if lp:
+                        price = int(float(lp))
+                except Exception:
+                    pass
+        if price is None:
+            return None
+        return price // 10 if price > 10_000_000 else price
+    except Exception:
+        return None
+
+
 def append_sample(pid: str, price: int, avg: int | None = None,
-                  dk_price: int | None = None) -> None:
+                  dk_price: int | None = None,
+                  extra_prices: dict | None = None) -> None:
     DATA_DIR.mkdir(exist_ok=True)
     path = DATA_DIR / f"{pid}.json"
     samples = []
@@ -163,6 +197,8 @@ def append_sample(pid: str, price: int, avg: int | None = None,
         entry["avg"] = avg
     if dk_price is not None:
         entry["dk"] = dk_price
+    if extra_prices:
+        entry["src"] = extra_prices
     samples.append(entry)
     path.write_text(json.dumps(samples, ensure_ascii=False, indent=1), encoding="utf-8")
 
@@ -181,6 +217,7 @@ def main() -> int:
         try:
             avg = None
             dk_price = None
+            extra_prices = None
             if product.get("source") == "digikala":
                 price = fetch_price_digikala(product)
             else:
@@ -192,16 +229,25 @@ def main() -> int:
                 dk_id = product.get("digikala_id")
                 if dk_id:
                     dk_price = fetch_price_digikala_by_id(dk_id)
+                extra = product.get("extra_sources") or {}
+                if extra:
+                    srcs = {}
+                    for name, url in extra.items():
+                        cp = fetch_price_custom(url)
+                        if cp:
+                            srcs[name] = cp
+                    extra_prices = srcs or None
         except Exception as e:
             print(f"  [error] {e}", file=sys.stderr)
             price = None
             avg = None
             dk_price = None
+            extra_prices = None
         if price is None:
             print("  -> no price (skipped)")
             fail += 1
         else:
-            append_sample(pid, price, avg, dk_price)
+            append_sample(pid, price, avg, dk_price, extra_prices)
             extra = ""
             if avg:
                 extra += f" | avg10={avg:,}"

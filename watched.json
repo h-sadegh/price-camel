@@ -21,7 +21,10 @@
       "query": "پوشک کودک مولفیکس مدل Ultra Firsat paketi سایز 5 بسته 78 عددی",
       "target_price": null,
       "url": "https://torob.com/p/5cdecca2-b128-47b5-92d8-b936bf850c10/",
-      "digikala_id": "17232262"
+      "digikala_id": "17232262",
+      "extra_sources": {
+        "ایمالز": "https://emalls.ir/%D9%85%D8%B4%D8%AE%D8%B5%D8%A7%D8%AA_%D9%BE%D9%88%D8%B4%DA%A9-%D8%A8%DA%86%D9%87-%D9%85%D9%88%D9%84%D9%81%DB%8C%DA%A9%D8%B3-%D9%85%D8%AF%D9%84-%DA%86%D8%B3%D8%A8%DB%8C-%D8%B3%D8%A7%DB%8C%D8%B2-5-%D8%A8%D8%B3%D8%AA%D9%87-78-%D8%B9%D8%AF%D8%AF%DB%8C~id~9099698"
+      }
     },
     {
       "id": "ac3a98a2-5ad2-428d-9d71-d2d58aa361fc",
@@ -36,7 +39,11 @@
       "query": "پوشک بچه مولفیکس سایز 6 بسته 62 عددی",
       "target_price": null,
       "url": "https://torob.com/p/f51e2820-175e-42e9-992a-8eb42e185c58/",
-      "digikala_id": "17232334"
+      "digikala_id": "17232334",
+      "extra_sources": {
+        "سزون‌ماکو": "https://sezonmaku.ir/product/596/",
+        "ایمالز": "https://emalls.ir/%D9%85%D8%B4%D8%AE%D8%B5%D8%A7%D8%AA_%D9%BE%D9%88%D8%B4%DA%A9-%D8%A8%DA%86%D9%87-%D9%85%D9%88%D9%84%D9%81%DB%8C%DA%A9%D8%B3-%D9%85%D8%AF%D9%84-%DA%86%D8%B3%D8%A8%DB%8C-%D8%B3%D8%A7%DB%8C%D8%B2-6-%D8%A8%D8%B3%D8%AA%D9%87-62-%D8%B9%D8%AF%D8%AF%DB%8C~id~9099697"
+      }
     }
   ]
 }
